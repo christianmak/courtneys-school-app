@@ -12,7 +12,7 @@ export default function ClassTabs({ classes, activeId, onSelect, onAdd }) {
           {c.name}
         </button>
       ))}
-      <button aria-label="+" onClick={onAdd} style={{ padding: '10px 16px', border: 'none', background: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: '18px' }}>
+      <button aria-label="Add class" onClick={onAdd} style={{ padding: '10px 16px', border: 'none', background: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: '18px' }}>
         +
       </button>
     </div>

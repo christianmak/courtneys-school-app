@@ -22,6 +22,6 @@ test('calls onSelect with class id when tab clicked', () => {
 test('calls onAdd when + button clicked', () => {
   const onAdd = vi.fn()
   render(<ClassTabs classes={classes} activeId="1" onSelect={() => {}} onAdd={onAdd} />)
-  fireEvent.click(screen.getByRole('button', { name: '+' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Add class' }))
   expect(onAdd).toHaveBeenCalled()
 })
