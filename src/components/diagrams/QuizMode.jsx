@@ -12,7 +12,11 @@ export default function QuizMode({ diagram, labels, onBack }) {
   const [submitted, setSubmitted] = useState(false)
 
   const setAnswer = (id, val) => setAnswers((prev) => ({ ...prev, [id]: val }))
-  const correctCount = submitted ? labels.filter((l) => normalize(answers[l.id] ?? '') === normalize(l.label_text)).length : null
+
+  const correctIds = submitted
+    ? new Set(labels.filter((l) => normalize(answers[l.id] ?? '') === normalize(l.label_text)).map((l) => l.id))
+    : new Set()
+  const correctCount = submitted ? correctIds.size : null
 
   return (
     <div>
@@ -37,7 +41,7 @@ export default function QuizMode({ diagram, labels, onBack }) {
           <Layer>
             {image && <KonvaImage image={image} width={560} height={420} />}
             {diagram.mode === 'labeled' && labels.map((l) => {
-              const correct = submitted && normalize(answers[l.id] ?? '') === normalize(l.label_text)
+              const correct = correctIds.has(l.id)
               return (
                 <Rect
                   key={l.id}
@@ -62,8 +66,7 @@ export default function QuizMode({ diagram, labels, onBack }) {
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto', maxHeight: '420px' }}>
           {labels.map((l, i) => {
-            const correct = submitted && normalize(answers[l.id] ?? '') === normalize(l.label_text)
-            const wrong = submitted && !correct
+            const correct = correctIds.has(l.id)
             return (
               <div key={l.id}>
                 <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '3px' }}>
@@ -76,7 +79,7 @@ export default function QuizMode({ diagram, labels, onBack }) {
                   placeholder="Your answer..."
                   style={{ width: '100%', padding: '7px 10px', border: `1px solid ${!submitted ? '#d1d5db' : correct ? '#86efac' : '#fca5a5'}`, borderRadius: '6px', background: !submitted ? '#fff' : correct ? '#f0fdf4' : '#fef2f2' }}
                 />
-                {submitted && wrong && <div style={{ fontSize: '12px', color: '#ef4444', marginTop: '2px' }}>✗ {l.label_text}</div>}
+                {submitted && !correct && <div style={{ fontSize: '12px', color: '#ef4444', marginTop: '2px' }}>✗ {l.label_text}</div>}
                 {submitted && correct && <div style={{ fontSize: '12px', color: '#22c55e', marginTop: '2px' }}>✓ Correct</div>}
               </div>
             )

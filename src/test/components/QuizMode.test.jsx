@@ -1,3 +1,17 @@
+vi.mock('react-konva', () => ({
+  Stage: ({ children }) => <div>{children}</div>,
+  Layer: ({ children }) => <div>{children}</div>,
+  Image: () => null,
+  Rect: () => null,
+  Circle: () => null,
+  Text: () => null,
+  Group: () => null,
+}))
+
+vi.mock('use-image', () => ({
+  default: () => [null, 'loading'],
+}))
+
 import { render, screen, fireEvent } from '@testing-library/react'
 import QuizMode from '../../components/diagrams/QuizMode'
 

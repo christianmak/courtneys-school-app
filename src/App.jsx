@@ -39,7 +39,7 @@ export default function App() {
   }
 
   const renderContent = () => {
-    if (quizDiagram) return <QuizMode diagram={quizDiagram} labels={quizLabels} onBack={() => setQuizDiagram(null)} />
+    if (quizDiagram) return <QuizMode diagram={quizDiagram} labels={quizLabels} onBack={() => { setQuizDiagram(null); setQuizLabels([]) }} />
     if (activeNote) return <NoteEditor note={activeNote} onSave={(c) => updateNoteContent(activeNote.id, c)} onBack={() => setActiveNote(null)} />
     if (activeDiagram && activeDiagram.mode === 'labeled') {
       return (
