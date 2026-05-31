@@ -6,6 +6,7 @@ import DiagramList from './components/diagrams/DiagramList'
 import DiagramSetup from './components/diagrams/DiagramSetup'
 import LabeledSetup from './components/diagrams/LabeledSetup'
 import CleanSetup from './components/diagrams/CleanSetup'
+import QuizMode from './components/diagrams/QuizMode'
 import { useClasses } from './hooks/useClasses'
 import { useTopics } from './hooks/useTopics'
 import { useNotes } from './hooks/useNotes'
@@ -20,16 +21,25 @@ export default function App() {
   const { diagrams, addDiagram, addLabel, addLabels, getLabels } = useDiagrams(activeTopicId)
   const [activeNote, setActiveNote] = useState(null)
   const [activeDiagram, setActiveDiagram] = useState(null)
+  const [quizDiagram, setQuizDiagram] = useState(null)
+  const [quizLabels, setQuizLabels] = useState([])
   const [view, setView] = useState('notes')
 
   const handleAddClass = async () => { const name = prompt('Class name:'); if (!name) return; await addClass(name) }
   const handleAddTopic = async () => { const name = prompt('Topic name:'); if (!name) return; await addTopic(name) }
   const handleAddNote = async () => { const title = prompt('Note title:'); if (!title) return; await addNote(title) }
-  const handleSelectClass = (id) => { setActiveClassId(id); setActiveTopicId(null); setActiveNote(null); setActiveDiagram(null); setView('notes') }
-  const handleSelectTopic = (id) => { setActiveTopicId(id); setActiveNote(null); setActiveDiagram(null); setView('notes') }
+  const handleSelectClass = (id) => { setActiveClassId(id); setActiveTopicId(null); setActiveNote(null); setActiveDiagram(null); setQuizDiagram(null); setQuizLabels([]); setView('notes') }
+  const handleSelectTopic = (id) => { setActiveTopicId(id); setActiveNote(null); setActiveDiagram(null); setQuizDiagram(null); setQuizLabels([]); setView('notes') }
   const handleUploadDiagram = async (name, file, mode) => { await addDiagram(name, file, mode); setView('diagrams') }
+  const handleOpenDiagram = async (diagram) => {
+    const labels = await getLabels(diagram.id)
+    if (labels.length === 0) { setActiveDiagram(diagram); return }
+    setQuizLabels(labels)
+    setQuizDiagram(diagram)
+  }
 
   const renderContent = () => {
+    if (quizDiagram) return <QuizMode diagram={quizDiagram} labels={quizLabels} onBack={() => setQuizDiagram(null)} />
     if (activeNote) return <NoteEditor note={activeNote} onSave={(c) => updateNoteContent(activeNote.id, c)} onBack={() => setActiveNote(null)} />
     if (activeDiagram && activeDiagram.mode === 'labeled') {
       return (
@@ -60,7 +70,7 @@ export default function App() {
           ))}
         </div>
         {view === 'notes' && <NotesList notes={notes} onSelect={setActiveNote} onAdd={handleAddNote} />}
-        {view === 'diagrams' && <DiagramList diagrams={diagrams} onSelect={setActiveDiagram} onAdd={() => setView('addDiagram')} />}
+        {view === 'diagrams' && <DiagramList diagrams={diagrams} onSelect={handleOpenDiagram} onAdd={() => setView('addDiagram')} />}
       </div>
     )
   }
