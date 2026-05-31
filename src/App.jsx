@@ -5,6 +5,7 @@ import NoteEditor from './components/notes/NoteEditor'
 import DiagramList from './components/diagrams/DiagramList'
 import DiagramSetup from './components/diagrams/DiagramSetup'
 import LabeledSetup from './components/diagrams/LabeledSetup'
+import CleanSetup from './components/diagrams/CleanSetup'
 import { useClasses } from './hooks/useClasses'
 import { useTopics } from './hooks/useTopics'
 import { useNotes } from './hooks/useNotes'
@@ -40,7 +41,13 @@ export default function App() {
       )
     }
     if (activeDiagram && activeDiagram.mode === 'clean') {
-      return <div><button onClick={() => setActiveDiagram(null)}>← Back</button><p style={{marginTop:'8px',color:'#9ca3af'}}>Clean setup coming soon (Task 10).</p></div>
+      return (
+        <CleanSetup
+          diagram={activeDiagram}
+          onSaveLabels={(labels) => addLabels(activeDiagram.id, labels)}
+          onDone={() => setActiveDiagram(null)}
+        />
+      )
     }
     if (activeDiagram) return <div><button onClick={() => setActiveDiagram(null)} style={{ padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer', background: '#fff' }}>← Back</button></div>
     if (view === 'addDiagram') return <DiagramSetup onUpload={handleUploadDiagram} />
