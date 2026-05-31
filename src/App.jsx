@@ -4,6 +4,7 @@ import NotesList from './components/notes/NotesList'
 import NoteEditor from './components/notes/NoteEditor'
 import DiagramList from './components/diagrams/DiagramList'
 import DiagramSetup from './components/diagrams/DiagramSetup'
+import LabeledSetup from './components/diagrams/LabeledSetup'
 import { useClasses } from './hooks/useClasses'
 import { useTopics } from './hooks/useTopics'
 import { useNotes } from './hooks/useNotes'
@@ -29,7 +30,18 @@ export default function App() {
 
   const renderContent = () => {
     if (activeNote) return <NoteEditor note={activeNote} onSave={(c) => updateNoteContent(activeNote.id, c)} onBack={() => setActiveNote(null)} />
-    if (activeDiagram) return <div><button onClick={() => setActiveDiagram(null)}>← Back</button><p style={{marginTop:'8px',color:'#9ca3af'}}>Quiz coming soon.</p></div>
+    if (activeDiagram && activeDiagram.mode === 'labeled') {
+      return (
+        <LabeledSetup
+          diagram={activeDiagram}
+          onSaveLabels={async (labels) => { for (const l of labels) await addLabel(activeDiagram.id, l) }}
+          onDone={() => setActiveDiagram(null)}
+        />
+      )
+    }
+    if (activeDiagram && activeDiagram.mode === 'clean') {
+      return <div><button onClick={() => setActiveDiagram(null)}>← Back</button><p style={{marginTop:'8px',color:'#9ca3af'}}>Clean setup coming soon (Task 10).</p></div>
+    }
     if (view === 'addDiagram') return <DiagramSetup onUpload={handleUploadDiagram} />
     if (!activeTopicId) return <p style={{ color: '#9ca3af' }}>Select a topic to get started.</p>
     return (
