@@ -1,9 +1,11 @@
-function App() {
+import { useState } from 'react'
+import AppShell from './components/layout/AppShell'
+
+export default function App() {
   return (
-    <div>
-      <h1>School Study App</h1>
-    </div>
+    <AppShell classes={[]} activeClassId={null} onSelectClass={() => {}} onAddClass={() => {}}
+      topics={[]} activeTopicId={null} onSelectTopic={() => {}} onAddTopic={() => {}}>
+      <p style={{ color: '#9ca3af' }}>Select a class and topic to get started.</p>
+    </AppShell>
   )
 }
-
-export default App
