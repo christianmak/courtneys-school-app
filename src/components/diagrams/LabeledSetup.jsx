@@ -5,7 +5,6 @@ import useImage from 'use-image'
 export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
   const [image] = useImage(diagram.image_url, 'anonymous')
   const [labels, setLabels] = useState([])
-  const [drawing, setDrawing] = useState(false)
   const [startPos, setStartPos] = useState(null)
   const [currentRect, setCurrentRect] = useState(null)
   const [pendingRect, setPendingRect] = useState(null)
@@ -17,19 +16,19 @@ export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
   const handleMouseDown = () => {
     if (pendingRect) return
     const pos = getPos()
-    setStartPos(pos); setDrawing(true)
+    setStartPos(pos)
     setCurrentRect({ x: pos.x, y: pos.y, width: 0, height: 0 })
   }
 
   const handleMouseMove = () => {
-    if (!drawing) return
+    if (!startPos) return
     const pos = getPos()
     setCurrentRect({ x: Math.min(startPos.x, pos.x), y: Math.min(startPos.y, pos.y), width: Math.abs(pos.x - startPos.x), height: Math.abs(pos.y - startPos.y) })
   }
 
   const handleMouseUp = () => {
-    if (!drawing) return
-    setDrawing(false)
+    if (!startPos) return
+    setStartPos(null)
     if (!currentRect || currentRect.width < 10 || currentRect.height < 10) { setCurrentRect(null); return }
     setPendingRect(currentRect); setCurrentRect(null)
   }

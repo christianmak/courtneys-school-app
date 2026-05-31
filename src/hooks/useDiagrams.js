@@ -30,6 +30,11 @@ export function useDiagrams(topicId) {
     await supabase.from('diagram_labels').insert({ diagram_id: diagramId, ...labelData })
   }
 
+  const addLabels = async (diagramId, labelsArray) => {
+    if (!labelsArray.length) return
+    await supabase.from('diagram_labels').insert(labelsArray.map((l) => ({ diagram_id: diagramId, ...l })))
+  }
+
   const getLabels = async (diagramId) => {
     const { data } = await supabase.from('diagram_labels').select('*').eq('diagram_id', diagramId)
     return data ?? []
@@ -39,5 +44,5 @@ export function useDiagrams(topicId) {
     await supabase.from('diagram_labels').delete().eq('diagram_id', diagramId)
   }
 
-  return { diagrams, addDiagram, deleteDiagram, addLabel, getLabels, deleteLabels }
+  return { diagrams, addDiagram, deleteDiagram, addLabel, addLabels, getLabels, deleteLabels }
 }

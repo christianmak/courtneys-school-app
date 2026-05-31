@@ -16,7 +16,7 @@ export default function App() {
   const { topics, addTopic } = useTopics(activeClassId)
   const [activeTopicId, setActiveTopicId] = useState(null)
   const { notes, addNote, updateNoteContent } = useNotes(activeTopicId)
-  const { diagrams, addDiagram, addLabel, getLabels } = useDiagrams(activeTopicId)
+  const { diagrams, addDiagram, addLabel, addLabels, getLabels } = useDiagrams(activeTopicId)
   const [activeNote, setActiveNote] = useState(null)
   const [activeDiagram, setActiveDiagram] = useState(null)
   const [view, setView] = useState('notes')
@@ -34,7 +34,7 @@ export default function App() {
       return (
         <LabeledSetup
           diagram={activeDiagram}
-          onSaveLabels={async (labels) => { for (const l of labels) await addLabel(activeDiagram.id, l) }}
+          onSaveLabels={(labels) => addLabels(activeDiagram.id, labels)}
           onDone={() => setActiveDiagram(null)}
         />
       )
@@ -42,6 +42,7 @@ export default function App() {
     if (activeDiagram && activeDiagram.mode === 'clean') {
       return <div><button onClick={() => setActiveDiagram(null)}>← Back</button><p style={{marginTop:'8px',color:'#9ca3af'}}>Clean setup coming soon (Task 10).</p></div>
     }
+    if (activeDiagram) return <div><button onClick={() => setActiveDiagram(null)} style={{ padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer', background: '#fff' }}>← Back</button></div>
     if (view === 'addDiagram') return <DiagramSetup onUpload={handleUploadDiagram} />
     if (!activeTopicId) return <p style={{ color: '#9ca3af' }}>Select a topic to get started.</p>
     return (
