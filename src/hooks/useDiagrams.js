@@ -21,6 +21,7 @@ export function useDiagrams(topicId) {
   }
 
   const deleteDiagram = async (id) => {
+    await supabase.from('diagram_labels').delete().eq('diagram_id', id)
     await supabase.from('diagrams').delete().eq('id', id)
     await fetchDiagrams()
   }

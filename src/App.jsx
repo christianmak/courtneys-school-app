@@ -23,7 +23,7 @@ export default function App() {
   const handleAddClass = async () => { const name = prompt('Class name:'); if (!name) return; await addClass(name) }
   const handleAddTopic = async () => { const name = prompt('Topic name:'); if (!name) return; await addTopic(name) }
   const handleAddNote = async () => { const title = prompt('Note title:'); if (!title) return; await addNote(title) }
-  const handleSelectClass = (id) => { setActiveClassId(id); setActiveTopicId(null); setActiveNote(null); setActiveDiagram(null) }
+  const handleSelectClass = (id) => { setActiveClassId(id); setActiveTopicId(null); setActiveNote(null); setActiveDiagram(null); setView('notes') }
   const handleSelectTopic = (id) => { setActiveTopicId(id); setActiveNote(null); setActiveDiagram(null); setView('notes') }
   const handleUploadDiagram = async (name, file, mode) => { await addDiagram(name, file, mode); setView('diagrams') }
 

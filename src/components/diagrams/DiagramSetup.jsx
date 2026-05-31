@@ -1,10 +1,9 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
 export default function DiagramSetup({ onUpload }) {
   const [mode, setMode] = useState(null)
   const [name, setName] = useState('')
   const [file, setFile] = useState(null)
-  const fileRef = useRef()
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -33,7 +32,7 @@ export default function DiagramSetup({ onUpload }) {
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: '4px', fontSize: '13px', fontWeight: '500' }}>Image</label>
-          <input ref={fileRef} type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
+          <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
         </div>
         <button type="submit" disabled={!name || !file || !mode} style={{ padding: '10px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: (!name || !file || !mode) ? 0.5 : 1 }}>
           Upload & set up labels

@@ -18,9 +18,12 @@ test('returns empty array when topicId is null', async () => {
 
 test('addDiagram uploads image and inserts record', async () => {
   supabase.order.mockResolvedValue({ data: [], error: null })
-  supabase.single.mockResolvedValueOnce({ data: { id: 'd2' }, error: null })
+  const mockBucket = { upload: vi.fn(), getPublicUrl: vi.fn(() => ({ data: { publicUrl: 'https://example.com/img.jpg' } })) }
+  supabase.storage.from.mockReturnValue(mockBucket)
   const { result } = renderHook(() => useDiagrams('t1'))
   const file = new File(['img'], 'cell.jpg', { type: 'image/jpeg' })
   await act(async () => { await result.current.addDiagram('Cell', file, 'labeled') })
   expect(supabase.storage.from).toHaveBeenCalledWith('diagrams')
+  expect(mockBucket.upload).toHaveBeenCalled()
+  expect(supabase.insert).toHaveBeenCalled()
 })
