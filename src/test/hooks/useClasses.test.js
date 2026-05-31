@@ -13,7 +13,7 @@ test('loads classes on mount', async () => {
 
 test('addClass inserts and refetches', async () => {
   supabase.order.mockResolvedValue({ data: [], error: null })
-  supabase.single.mockResolvedValueOnce({ data: { id: '2', name: 'Anatomy' }, error: null })
+  supabase.insert.mockResolvedValueOnce({ data: null, error: null })
   const { result } = renderHook(() => useClasses())
   await act(async () => { await result.current.addClass('Anatomy', '#ec4899') })
   expect(supabase.insert).toHaveBeenCalled()

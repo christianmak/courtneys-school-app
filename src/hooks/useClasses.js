@@ -12,12 +12,14 @@ export function useClasses() {
   useEffect(() => { fetchClasses() }, [fetchClasses])
 
   const addClass = async (name, color = '#6366f1') => {
-    await supabase.from('classes').insert({ name, color }).single()
+    const { error } = await supabase.from('classes').insert({ name, color })
+    if (error) throw error
     await fetchClasses()
   }
 
   const deleteClass = async (id) => {
-    await supabase.from('classes').delete().eq('id', id)
+    const { error } = await supabase.from('classes').delete().eq('id', id)
+    if (error) throw error
     await fetchClasses()
   }
 
