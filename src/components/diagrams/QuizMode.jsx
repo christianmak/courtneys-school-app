@@ -6,7 +6,7 @@ function normalize(str) {
   return str.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
-export default function QuizMode({ diagram, labels, onBack }) {
+export default function QuizMode({ diagram, labels, onBack, onRedoSetup }) {
   const [image] = useImage(diagram.image_url, 'anonymous')
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
@@ -30,6 +30,13 @@ export default function QuizMode({ diagram, labels, onBack }) {
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {submitted && <span style={{ fontWeight: '600', color: correctCount === labels.length ? '#22c55e' : '#ef4444' }}>Score: {correctCount}/{labels.length}</span>}
           <button aria-label="Back" onClick={onBack} style={{ padding: '8px 14px', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer', background: '#fff' }}>← Back</button>
+          <button
+            onClick={onRedoSetup}
+            style={{ padding: '8px 14px', border: '1px solid #d1d5db', borderRadius: '6px', cursor: 'pointer', background: '#fff', color: '#6b7280', fontSize: '13px' }}
+            title="Delete all labels and redo the setup"
+          >
+            ↺ Redo setup
+          </button>
           {!submitted
             ? <button aria-label="Submit" onClick={() => setSubmitted(true)} style={{ padding: '8px 16px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Submit</button>
             : <button onClick={() => { setAnswers({}); setSubmitted(false) }} style={{ padding: '8px 16px', background: '#e5e7eb', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Retry</button>}

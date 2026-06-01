@@ -20,7 +20,7 @@ export default function App() {
   const { topics, addTopic, deleteTopic } = useTopics(activeClassId)
   const [activeTopicId, setActiveTopicId] = useState(null)
   const { notes, addNote, updateNoteContent, deleteNote } = useNotes(activeTopicId)
-  const { diagrams, addDiagram, deleteDiagram, addLabel, addLabels, getLabels } = useDiagrams(activeTopicId)
+  const { diagrams, addDiagram, deleteDiagram, addLabel, addLabels, getLabels, deleteLabels } = useDiagrams(activeTopicId)
   const [activeNote, setActiveNote] = useState(null)
   const [activeDiagram, setActiveDiagram] = useState(null)
   const [quizDiagram, setQuizDiagram] = useState(null)
@@ -126,7 +126,23 @@ export default function App() {
   }
 
   const renderContent = () => {
-    if (quizDiagram) return <QuizMode diagram={quizDiagram} labels={quizLabels} onBack={() => { setQuizDiagram(null); setQuizLabels([]) }} />
+    if (quizDiagram) return (
+      <QuizMode
+        diagram={quizDiagram}
+        labels={quizLabels}
+        onBack={() => { setQuizDiagram(null); setQuizLabels([]) }}
+        onRedoSetup={async () => {
+          try {
+            await deleteLabels(quizDiagram.id)
+            setActiveDiagram(quizDiagram)
+            setQuizDiagram(null)
+            setQuizLabels([])
+          } catch {
+            showError('Failed to clear labels. Please try again.')
+          }
+        }}
+      />
+    )
     if (activeNote) return (
       <NoteEditor
         note={activeNote}

@@ -22,12 +22,12 @@ const labels = [
 ]
 
 test('renders a submit button', () => {
-  render(<QuizMode diagram={labeledDiagram} labels={labels} onBack={() => {}} />)
+  render(<QuizMode diagram={labeledDiagram} labels={labels} onBack={() => {}} onRedoSetup={() => {}} />)
   expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument()
 })
 
 test('shows score after submit', () => {
-  render(<QuizMode diagram={labeledDiagram} labels={labels} onBack={() => {}} />)
+  render(<QuizMode diagram={labeledDiagram} labels={labels} onBack={() => {}} onRedoSetup={() => {}} />)
   fireEvent.click(screen.getByRole('button', { name: /submit/i }))
   expect(screen.getByText(/score/i)).toBeInTheDocument()
 })
@@ -40,7 +40,7 @@ test('calls onBack when back button clicked', () => {
 })
 
 test('correct answer shown in green after submit', () => {
-  render(<QuizMode diagram={labeledDiagram} labels={labels} onBack={() => {}} />)
+  render(<QuizMode diagram={labeledDiagram} labels={labels} onBack={() => {}} onRedoSetup={() => {}} />)
   const inputs = screen.getAllByPlaceholderText(/your answer/i)
   fireEvent.change(inputs[0], { target: { value: 'Nucleus' } })
   fireEvent.click(screen.getByRole('button', { name: /submit/i }))
