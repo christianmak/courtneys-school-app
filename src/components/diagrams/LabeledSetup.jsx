@@ -46,9 +46,12 @@ export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <div>
-          <h3 style={{ fontWeight: '600' }}>{diagram.name} — Label Setup</h3>
-          <p style={{ fontSize: '13px', color: '#6b7280' }}>Draw a rectangle over each printed label, then type what it says.</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button onClick={onDone} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: 0 }}>← Back</button>
+          <div>
+            <h3 style={{ fontWeight: '600' }}>{diagram.name} — Label Setup</h3>
+            <p style={{ fontSize: '13px', color: '#6b7280' }}>Draw a rectangle over each printed label, then type what it says.</p>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <span style={{ fontSize: '13px', color: '#6b7280' }}>{labels.length} label{labels.length !== 1 ? 's' : ''}</span>
