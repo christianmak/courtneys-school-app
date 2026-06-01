@@ -29,7 +29,13 @@ export function useNotes(topicId) {
     await fetchNotes()
   }
 
-  return { notes, addNote, updateNoteContent, deleteNote }
+  const renameNote = async (id, title) => {
+    const { error } = await supabase.from('notes').update({ title }).eq('id', id)
+    if (error) throw error
+    await fetchNotes()
+  }
+
+  return { notes, addNote, updateNoteContent, deleteNote, renameNote }
 }
 
 export async function uploadNoteImage(topicId, noteId, file) {

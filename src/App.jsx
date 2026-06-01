@@ -19,7 +19,7 @@ export default function App() {
   const [activeClassId, setActiveClassId] = useState(null)
   const { topics, addTopic, deleteTopic } = useTopics(activeClassId)
   const [activeTopicId, setActiveTopicId] = useState(null)
-  const { notes, addNote, updateNoteContent, deleteNote } = useNotes(activeTopicId)
+  const { notes, addNote, updateNoteContent, deleteNote, renameNote } = useNotes(activeTopicId)
   const { diagrams, addDiagram, deleteDiagram, addLabel, addLabels, getLabels, deleteLabels } = useDiagrams(activeTopicId)
   const [activeNote, setActiveNote] = useState(null)
   const [activeDiagram, setActiveDiagram] = useState(null)
@@ -155,6 +155,14 @@ export default function App() {
           }
         }}
         onBack={() => setActiveNote(null)}
+        onRename={async (newTitle) => {
+          try {
+            await renameNote(activeNote.id, newTitle)
+            setActiveNote((prev) => ({ ...prev, title: newTitle }))
+          } catch {
+            showError('Failed to rename note. Please try again.')
+          }
+        }}
       />
     )
     if (activeDiagram && activeDiagram.mode === 'labeled') {

@@ -12,12 +12,14 @@ function getSvgPath(stroke) {
   }, '') + ' Z'
 }
 
-export default function NoteEditor({ note, onSave, onBack }) {
+export default function NoteEditor({ note, onSave, onBack, onRename }) {
   const [strokes, setStrokes] = useState(note?.content?.strokes ?? [])
   const [images, setImages] = useState(note?.content?.images ?? [])
   const [tool, setTool] = useState('pen')
   const [color, setColor] = useState('#000000')
   const [size, setSize] = useState(4)
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleDraft, setTitleDraft] = useState(note.title)
   const [livePoints, setLivePoints] = useState([])
   const isDrawing = useRef(false)
   const currentPoints = useRef([])
@@ -118,7 +120,32 @@ export default function NoteEditor({ note, onSave, onBack }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px', borderBottom: '1px solid #e5e7eb' }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}>← Back</button>
-        <h2 style={{ fontSize: '15px', fontWeight: '600' }}>{note.title}</h2>
+        {editingTitle ? (
+          <input
+            autoFocus
+            value={titleDraft}
+            onChange={(e) => setTitleDraft(e.target.value)}
+            onBlur={() => {
+              setEditingTitle(false)
+              if (titleDraft.trim() && titleDraft.trim() !== note.title) {
+                onRename?.(titleDraft.trim())
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.target.blur()
+              if (e.key === 'Escape') { setTitleDraft(note.title); setEditingTitle(false) }
+            }}
+            style={{ fontSize: '15px', fontWeight: '600', border: 'none', borderBottom: '2px solid #6366f1', background: 'transparent', outline: 'none', minWidth: '120px' }}
+          />
+        ) : (
+          <h2
+            onClick={() => setEditingTitle(true)}
+            style={{ fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}
+            title="Click to rename"
+          >
+            {note.title}
+          </h2>
+        )}
       </div>
       <PenToolbar tool={tool} color={color} size={size} onToolChange={setTool} onColorChange={setColor} onSizeChange={setSize} onClear={handleClear} onInsertImage={handleInsertImage} />
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: '#fafafa' }}>
