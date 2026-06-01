@@ -34,6 +34,7 @@ export default function NoteEditor({ note, onSave, onBack }) {
   }
 
   const handlePointerDown = (e) => {
+    if (e.pointerType === 'touch') return
     e.preventDefault()
     isDrawing.current = true
     currentPoints.current = [getPoint(e)]
@@ -42,6 +43,7 @@ export default function NoteEditor({ note, onSave, onBack }) {
 
   const handlePointerMove = (e) => {
     if (!isDrawing.current) return
+    if (e.pointerType === 'touch') return
     e.preventDefault()
     currentPoints.current = [...currentPoints.current, getPoint(e)]
     setLivePoints([...currentPoints.current])
@@ -79,14 +81,38 @@ export default function NoteEditor({ note, onSave, onBack }) {
         <h2 style={{ fontSize: '15px', fontWeight: '600' }}>{note.title}</h2>
       </div>
       <PenToolbar tool={tool} color={color} size={size} onToolChange={setTool} onColorChange={setColor} onSizeChange={setSize} onClear={handleClear} />
-      <svg ref={svgRef} style={{ flex: 1, touchAction: 'none', background: '#fafafa', cursor: tool === 'eraser' ? 'cell' : 'crosshair' }}
-        onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
-        {strokes.map((s, i) => {
-          const outline = getStroke(s.points, { size: s.size, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
-          return <path key={i} d={getSvgPath(outline)} fill={s.color} />
-        })}
-        {liveStrokeOutline.length > 0 && <path d={getSvgPath(liveStrokeOutline)} fill={color} opacity="0.85" />}
-      </svg>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: '#fafafa' }}>
+        <svg ref={svgRef}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '2400px',
+            touchAction: 'pan-y',
+            cursor: tool === 'eraser' ? 'cell' : 'crosshair'
+          }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+        >
+          {/* Ruled lines */}
+          {Array.from({ length: 75 }, (_, i) => (
+            <line
+              key={i}
+              x1="0" y1={i * 32 + 48}
+              x2="100%" y2={i * 32 + 48}
+              stroke="#e5e7eb" strokeWidth="1"
+            />
+          ))}
+          {/* Left margin line */}
+          <line x1="60" y1="0" x2="60" y2="2400" stroke="#fecdd3" strokeWidth="1" />
+          {strokes.map((s, i) => {
+            const outline = getStroke(s.points, { size: s.size, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
+            return <path key={i} d={getSvgPath(outline)} fill={s.color} />
+          })}
+          {liveStrokeOutline.length > 0 && <path d={getSvgPath(liveStrokeOutline)} fill={color} opacity="0.85" />}
+        </svg>
+      </div>
     </div>
   )
 }
