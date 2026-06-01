@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { Stage, Layer, Image as KonvaImage, Circle, Text } from 'react-konva'
 import useImage from 'use-image'
+import { useCanvasSize } from '../../hooks/useCanvasSize'
 
 export default function CleanSetup({ diagram, onSaveLabels, onDone }) {
   const [image] = useImage(diagram.image_url, 'anonymous')
@@ -8,6 +9,7 @@ export default function CleanSetup({ diagram, onSaveLabels, onDone }) {
   const [pendingPin, setPendingPin] = useState(null)
   const [labelText, setLabelText] = useState('')
   const stageRef = useRef()
+  const { containerRef, width, height } = useCanvasSize(700, 7 / 5)
 
   const handleClick = () => {
     if (pendingPin) return
@@ -36,9 +38,10 @@ export default function CleanSetup({ diagram, onSaveLabels, onDone }) {
           </button>
         </div>
       </div>
-      <Stage ref={stageRef} width={700} height={500} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'crosshair' }} onClick={handleClick} onTap={handleClick}>
+      <div ref={containerRef} style={{ width: '100%' }}>
+      <Stage ref={stageRef} width={width} height={height} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'crosshair' }} onClick={handleClick} onTap={handleClick}>
         <Layer>
-          {image && <KonvaImage image={image} width={700} height={500} />}
+          {image && <KonvaImage image={image} width={width} height={height} />}
           {pins.map((p, i) => (
             <React.Fragment key={i}>
               <Circle x={p.pin_x} y={p.pin_y} radius={8} fill="#6366f1" stroke="#fff" strokeWidth={2} />
@@ -48,6 +51,7 @@ export default function CleanSetup({ diagram, onSaveLabels, onDone }) {
           {pendingPin && <Circle x={pendingPin.x} y={pendingPin.y} radius={8} fill="#ef4444" stroke="#fff" strokeWidth={2} />}
         </Layer>
       </Stage>
+      </div>
       {pendingPin && (
         <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
           <input autoFocus value={labelText} onChange={(e) => setLabelText(e.target.value)} placeholder="Label for this structure" onKeyDown={(e) => e.key === 'Enter' && handleConfirm()} style={{ flex: 1, padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px' }} />

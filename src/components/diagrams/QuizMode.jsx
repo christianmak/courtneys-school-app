@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Stage, Layer, Image as KonvaImage, Rect, Circle, Text } from 'react-konva'
 import useImage from 'use-image'
+import { useCanvasSize } from '../../hooks/useCanvasSize'
 
 function normalize(str) {
   return str.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -10,6 +11,7 @@ export default function QuizMode({ diagram, labels, onBack, onRedoSetup }) {
   const [image] = useImage(diagram.image_url, 'anonymous')
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
+  const { containerRef, width, height } = useCanvasSize(560, 4 / 3)
 
   const setAnswer = (id, val) => setAnswers((prev) => ({ ...prev, [id]: val }))
 
@@ -43,10 +45,10 @@ export default function QuizMode({ diagram, labels, onBack, onRedoSetup }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '20px' }}>
-        <Stage width={560} height={420} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', flexShrink: 0 }}>
+      <div ref={containerRef} style={{ display: 'flex', gap: '20px' }}>
+        <Stage width={width} height={height} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', flexShrink: 0 }}>
           <Layer>
-            {image && <KonvaImage image={image} width={560} height={420} />}
+            {image && <KonvaImage image={image} width={width} height={height} />}
             {diagram.mode === 'labeled' && labels.map((l) => {
               const correct = correctIds.has(l.id)
               return (
@@ -71,7 +73,7 @@ export default function QuizMode({ diagram, labels, onBack, onRedoSetup }) {
           </Layer>
         </Stage>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto', maxHeight: '420px' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto', maxHeight: `${height}px` }}>
           {labels.map((l, i) => {
             const correct = correctIds.has(l.id)
             return (

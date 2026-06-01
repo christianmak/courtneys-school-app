@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Stage, Layer, Image as KonvaImage, Rect } from 'react-konva'
 import useImage from 'use-image'
+import { useCanvasSize } from '../../hooks/useCanvasSize'
 
 export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
   const [image] = useImage(diagram.image_url, 'anonymous')
@@ -10,6 +11,7 @@ export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
   const [pendingRect, setPendingRect] = useState(null)
   const [labelText, setLabelText] = useState('')
   const stageRef = useRef()
+  const { containerRef, width, height } = useCanvasSize(700, 7 / 5)
 
   const getPos = () => stageRef.current.getPointerPosition()
 
@@ -55,16 +57,18 @@ export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
           </button>
         </div>
       </div>
-      <Stage ref={stageRef} width={700} height={500} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'crosshair' }}
+      <div ref={containerRef} style={{ width: '100%' }}>
+      <Stage ref={stageRef} width={width} height={height} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'crosshair' }}
         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}
         onTouchStart={handleMouseDown} onTouchMove={handleMouseMove} onTouchEnd={handleMouseUp}>
         <Layer>
-          {image && <KonvaImage image={image} width={700} height={500} />}
+          {image && <KonvaImage image={image} width={width} height={height} />}
           {labels.map((l, i) => <Rect key={i} x={l.x} y={l.y} width={l.width} height={l.height} fill="rgba(99,102,241,0.3)" stroke="#6366f1" strokeWidth={1} />)}
           {currentRect && <Rect x={currentRect.x} y={currentRect.y} width={currentRect.width} height={currentRect.height} fill="rgba(239,68,68,0.2)" stroke="#ef4444" strokeWidth={1} dash={[4, 4]} />}
           {pendingRect && <Rect x={pendingRect.x} y={pendingRect.y} width={pendingRect.width} height={pendingRect.height} fill="rgba(239,68,68,0.25)" stroke="#ef4444" strokeWidth={2} />}
         </Layer>
       </Stage>
+      </div>
       {pendingRect && (
         <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
           <input autoFocus value={labelText} onChange={(e) => setLabelText(e.target.value)} placeholder="What does this label say?" onKeyDown={(e) => e.key === 'Enter' && handleConfirm()} style={{ flex: 1, padding: '8px', border: '1px solid #d1d5db', borderRadius: '6px' }} />
