@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { getStroke } from 'perfect-freehand'
 import PenToolbar from './PenToolbar'
 import { uploadNoteImage } from '../../hooks/useNotes'
@@ -73,25 +73,41 @@ export default function NoteEditor({ note, onSave, onBack }) {
     onSave({ strokes: [], images: [], version: 2 })
   }
 
-  const handleInsertImage = async (file) => {
+  const handleInsertImage = useCallback(async (file) => {
     try {
       const url = await uploadNoteImage(note.topic_id, note.id, file)
-      const img = new Image()
+      const img = new window.Image()
       img.onload = () => {
         const maxW = 400
         const scale = Math.min(1, maxW / img.naturalWidth)
         const w = Math.round(img.naturalWidth * scale)
         const h = Math.round(img.naturalHeight * scale)
         const newImage = { id: Date.now().toString(), url, x: 80, y: 60, width: w, height: h }
-        const updated = [...images, newImage]
-        setImages(updated)
-        scheduleSave({ strokes, images: updated, version: 2 })
+        setImages((prev) => {
+          const updated = [...prev, newImage]
+          scheduleSave({ strokes, images: updated, version: 2 })
+          return updated
+        })
       }
       img.src = url
     } catch (err) {
       console.error('Failed to upload image', err)
     }
-  }
+  }, [note.topic_id, note.id, strokes, scheduleSave])
+
+  useEffect(() => {
+    const handlePaste = async (e) => {
+      const items = Array.from(e.clipboardData?.items ?? [])
+      const imageItem = items.find((item) => item.type.startsWith('image/'))
+      if (!imageItem) return
+      const file = imageItem.getAsFile()
+      if (!file) return
+      await handleInsertImage(file)
+    }
+
+    document.addEventListener('paste', handlePaste)
+    return () => document.removeEventListener('paste', handlePaste)
+  }, [handleInsertImage])
 
   const liveStrokeOutline = livePoints.length > 1 && tool === 'pen'
     ? getStroke(livePoints, { size, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
