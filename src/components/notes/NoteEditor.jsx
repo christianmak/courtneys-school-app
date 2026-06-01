@@ -12,6 +12,24 @@ function getSvgPath(stroke) {
   }, '') + ' Z'
 }
 
+function getStrokeBounds(stroke) {
+  const xs = stroke.points.map(([x]) => x)
+  const ys = stroke.points.map(([, y]) => y)
+  return {
+    minX: Math.min(...xs),
+    maxX: Math.max(...xs),
+    minY: Math.min(...ys),
+    maxY: Math.max(...ys),
+  }
+}
+
+function hitTest(bounds, x, y, radius = 20) {
+  return x >= bounds.minX - radius &&
+         x <= bounds.maxX + radius &&
+         y >= bounds.minY - radius &&
+         y <= bounds.maxY + radius
+}
+
 export default function NoteEditor({ note, onSave, onBack, onRename }) {
   const [strokes, setStrokes] = useState(note?.content?.strokes ?? [])
   const [images, setImages] = useState(note?.content?.images ?? [])
@@ -49,20 +67,33 @@ export default function NoteEditor({ note, onSave, onBack, onRename }) {
     if (!isDrawing.current) return
     if (e.pointerType === 'touch') return
     e.preventDefault()
-    currentPoints.current = [...currentPoints.current, getPoint(e)]
+    const point = getPoint(e)
+    currentPoints.current = [...currentPoints.current, point]
     setLivePoints([...currentPoints.current])
+
+    if (tool === 'eraser') {
+      const [ex, ey] = point
+      setStrokes((prev) => {
+        const filtered = prev.filter((s) => !hitTest(getStrokeBounds(s), ex, ey))
+        if (filtered.length !== prev.length) {
+          scheduleSave({ strokes: filtered, images, version: 2 })
+        }
+        return filtered
+      })
+    }
   }
 
   const handlePointerUp = () => {
     if (!isDrawing.current) return
     isDrawing.current = false
     if (currentPoints.current.length < 2) { setLivePoints([]); return }
-    let updated
     if (tool === 'eraser') {
-      updated = strokes.slice(0, -1)
-    } else {
-      updated = [...strokes, { points: currentPoints.current, color, size }]
+      // Erasing already happened in handlePointerMove, just clear live points
+      setLivePoints([])
+      currentPoints.current = []
+      return
     }
+    const updated = [...strokes, { points: currentPoints.current, color, size }]
     setStrokes(updated)
     setLivePoints([])
     currentPoints.current = []
@@ -189,6 +220,10 @@ export default function NoteEditor({ note, onSave, onBack, onRename }) {
             return <path key={i} d={getSvgPath(outline)} fill={s.color} />
           })}
           {liveStrokeOutline.length > 0 && <path d={getSvgPath(liveStrokeOutline)} fill={color} opacity="0.85" />}
+          {tool === 'eraser' && livePoints.length > 0 && (() => {
+            const [lx, ly] = livePoints[livePoints.length - 1]
+            return <circle cx={lx} cy={ly} r={20} fill="rgba(239,68,68,0.15)" stroke="#ef4444" strokeWidth={1} strokeDasharray="4 2" />
+          })()}
         </svg>
       </div>
     </div>
