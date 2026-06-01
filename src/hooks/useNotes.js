@@ -31,3 +31,11 @@ export function useNotes(topicId) {
 
   return { notes, addNote, updateNoteContent, deleteNote }
 }
+
+export async function uploadNoteImage(topicId, noteId, file) {
+  const path = `notes/${topicId}/${noteId}/${Date.now()}-${file.name}`
+  const { error } = await supabase.storage.from('diagrams').upload(path, file)
+  if (error) throw error
+  const { data: { publicUrl } } = supabase.storage.from('diagrams').getPublicUrl(path)
+  return publicUrl
+}

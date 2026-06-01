@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback } from 'react'
 import { getStroke } from 'perfect-freehand'
 import PenToolbar from './PenToolbar'
+import { uploadNoteImage } from '../../hooks/useNotes'
 
 function getSvgPath(stroke) {
   if (!stroke.length) return ''
@@ -13,6 +14,7 @@ function getSvgPath(stroke) {
 
 export default function NoteEditor({ note, onSave, onBack }) {
   const [strokes, setStrokes] = useState(note?.content?.strokes ?? [])
+  const [images, setImages] = useState(note?.content?.images ?? [])
   const [tool, setTool] = useState('pen')
   const [color, setColor] = useState('#000000')
   const [size, setSize] = useState(4)
@@ -22,9 +24,9 @@ export default function NoteEditor({ note, onSave, onBack }) {
   const saveTimer = useRef(null)
   const svgRef = useRef(null)
 
-  const scheduleSave = useCallback((updatedStrokes) => {
+  const scheduleSave = useCallback((content) => {
     clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(() => onSave({ strokes: updatedStrokes, version: 1 }), 800)
+    saveTimer.current = setTimeout(() => onSave(content), 800)
   }, [onSave])
 
   const getPoint = (e) => {
@@ -62,12 +64,33 @@ export default function NoteEditor({ note, onSave, onBack }) {
     setStrokes(updated)
     setLivePoints([])
     currentPoints.current = []
-    scheduleSave(updated)
+    scheduleSave({ strokes: updated, images, version: 2 })
   }
 
   const handleClear = () => {
     setStrokes([])
-    onSave({ strokes: [], version: 1 })
+    setImages([])
+    onSave({ strokes: [], images: [], version: 2 })
+  }
+
+  const handleInsertImage = async (file) => {
+    try {
+      const url = await uploadNoteImage(note.topic_id, note.id, file)
+      const img = new Image()
+      img.onload = () => {
+        const maxW = 400
+        const scale = Math.min(1, maxW / img.naturalWidth)
+        const w = Math.round(img.naturalWidth * scale)
+        const h = Math.round(img.naturalHeight * scale)
+        const newImage = { id: Date.now().toString(), url, x: 80, y: 60, width: w, height: h }
+        const updated = [...images, newImage]
+        setImages(updated)
+        scheduleSave({ strokes, images: updated, version: 2 })
+      }
+      img.src = url
+    } catch (err) {
+      console.error('Failed to upload image', err)
+    }
   }
 
   const liveStrokeOutline = livePoints.length > 1 && tool === 'pen'
@@ -80,7 +103,7 @@ export default function NoteEditor({ note, onSave, onBack }) {
         <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}>← Back</button>
         <h2 style={{ fontSize: '15px', fontWeight: '600' }}>{note.title}</h2>
       </div>
-      <PenToolbar tool={tool} color={color} size={size} onToolChange={setTool} onColorChange={setColor} onSizeChange={setSize} onClear={handleClear} />
+      <PenToolbar tool={tool} color={color} size={size} onToolChange={setTool} onColorChange={setColor} onSizeChange={setSize} onClear={handleClear} onInsertImage={handleInsertImage} />
       <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: '#fafafa' }}>
         <svg ref={svgRef}
           style={{
@@ -106,6 +129,17 @@ export default function NoteEditor({ note, onSave, onBack }) {
           ))}
           {/* Left margin line */}
           <line x1="60" y1="0" x2="60" y2="2400" stroke="#fecdd3" strokeWidth="1" />
+          {images.map((img) => (
+            <image
+              key={img.id}
+              href={img.url}
+              x={img.x}
+              y={img.y}
+              width={img.width}
+              height={img.height}
+              style={{ pointerEvents: 'none' }}
+            />
+          ))}
           {strokes.map((s, i) => {
             const outline = getStroke(s.points, { size: s.size, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
             return <path key={i} d={getSvgPath(outline)} fill={s.color} />
