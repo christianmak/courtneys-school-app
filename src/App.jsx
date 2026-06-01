@@ -64,10 +64,10 @@ export default function App() {
   const handleUploadDiagram = async (name, file, mode) => {
     try {
       await addDiagram(name, file, mode)
+      setView('diagrams')
     } catch (err) {
       showError('Failed to upload diagram. Check your connection and try again.')
     }
-    setView('diagrams')
   }
 
   const handleOpenDiagram = async (diagram) => {
@@ -132,6 +132,7 @@ export default function App() {
         labels={quizLabels}
         onBack={() => { setQuizDiagram(null); setQuizLabels([]) }}
         onRedoSetup={async () => {
+          if (!window.confirm('This will delete all saved labels. Are you sure?')) return
           try {
             await deleteLabels(quizDiagram.id)
             setActiveDiagram(quizDiagram)

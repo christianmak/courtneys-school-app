@@ -82,8 +82,9 @@ export default function NoteEditor({ note, onSave, onBack }) {
         const scale = Math.min(1, maxW / img.naturalWidth)
         const w = Math.round(img.naturalWidth * scale)
         const h = Math.round(img.naturalHeight * scale)
-        const newImage = { id: Date.now().toString(), url, x: 80, y: 60, width: w, height: h }
         setImages((prev) => {
+          const offset = prev.length * 24
+          const newImage = { id: Date.now().toString(), url, x: 80 + offset, y: 60 + offset, width: w, height: h }
           const updated = [...prev, newImage]
           scheduleSave({ strokes, images: updated, version: 2 })
           return updated
