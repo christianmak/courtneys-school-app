@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Stage, Layer, Image as KonvaImage, Rect } from 'react-konva'
 import useImage from 'use-image'
 import { useCanvasSize } from '../../hooks/useCanvasSize'
+import { computeImageFit, rectToRatios, ratiosToRect } from '../../lib/imageUtils'
 
 export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
   const [image, imageStatus] = useImage(diagram.image_url)
@@ -10,8 +11,15 @@ export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
   const [currentRect, setCurrentRect] = useState(null)
   const [pendingRect, setPendingRect] = useState(null)
   const [labelText, setLabelText] = useState('')
+  const [fit, setFit] = useState({ x: 0, y: 0, width: 700, height: 500 })
   const stageRef = useRef()
   const { containerRef, width, height } = useCanvasSize(700, 7 / 5)
+
+  useEffect(() => {
+    if (image) {
+      setFit(computeImageFit(image.naturalWidth, image.naturalHeight, width, height))
+    }
+  }, [image, width, height])
 
   const getPos = () => stageRef.current.getPointerPosition()
 
@@ -37,7 +45,8 @@ export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
 
   const handleConfirm = () => {
     if (!labelText.trim()) return
-    setLabels((prev) => [...prev, { x: pendingRect.x, y: pendingRect.y, width: pendingRect.width, height: pendingRect.height, label_text: labelText.trim() }])
+    const ratios = rectToRatios(pendingRect, fit)
+    setLabels((prev) => [...prev, { ...ratios, label_text: labelText.trim() }])
     setPendingRect(null); setLabelText('')
   }
 
@@ -71,8 +80,11 @@ export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}
         onTouchStart={handleMouseDown} onTouchMove={handleMouseMove} onTouchEnd={handleMouseUp}>
         <Layer>
-          {image && <KonvaImage image={image} width={width} height={height} />}
-          {labels.map((l, i) => <Rect key={i} x={l.x} y={l.y} width={l.width} height={l.height} fill="rgba(99,102,241,0.3)" stroke="#6366f1" strokeWidth={1} />)}
+          {image && <KonvaImage image={image} x={fit.x} y={fit.y} width={fit.width} height={fit.height} />}
+          {labels.map((l, i) => {
+            const r = ratiosToRect(l, fit)
+            return <Rect key={i} x={r.x} y={r.y} width={r.width} height={r.height} fill="rgba(99,102,241,0.3)" stroke="#6366f1" strokeWidth={1} />
+          })}
           {currentRect && <Rect x={currentRect.x} y={currentRect.y} width={currentRect.width} height={currentRect.height} fill="rgba(239,68,68,0.2)" stroke="#ef4444" strokeWidth={1} dash={[4, 4]} />}
           {pendingRect && <Rect x={pendingRect.x} y={pendingRect.y} width={pendingRect.width} height={pendingRect.height} fill="rgba(239,68,68,0.25)" stroke="#ef4444" strokeWidth={2} />}
         </Layer>

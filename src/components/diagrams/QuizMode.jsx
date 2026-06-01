@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Stage, Layer, Image as KonvaImage, Rect, Circle, Text } from 'react-konva'
 import useImage from 'use-image'
 import { useCanvasSize } from '../../hooks/useCanvasSize'
+import { computeImageFit, ratiosToRect, ratiosToPin } from '../../lib/imageUtils'
 
 function normalize(str) {
   return str.trim().toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -11,7 +12,14 @@ export default function QuizMode({ diagram, labels, onBack, onRedoSetup }) {
   const [image, imageStatus] = useImage(diagram.image_url)
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
-  const { containerRef, width, height } = useCanvasSize(560, 4 / 3)
+  const [fit, setFit] = useState({ x: 0, y: 0, width: 700, height: 500 })
+  const { containerRef, width, height } = useCanvasSize(700, 7 / 5)
+
+  useEffect(() => {
+    if (image) {
+      setFit(computeImageFit(image.naturalWidth, image.naturalHeight, width, height))
+    }
+  }, [image, width, height])
 
   const setAnswer = (id, val) => setAnswers((prev) => ({ ...prev, [id]: val }))
 
@@ -51,35 +59,36 @@ export default function QuizMode({ diagram, labels, onBack, onRedoSetup }) {
       {imageStatus === 'failed' && (
         <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '8px' }}>⚠ Image failed to load. Check your connection.</p>
       )}
-      <div ref={containerRef} style={{ display: 'flex', gap: '20px' }}>
+      <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <Stage width={width} height={height} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', flexShrink: 0 }}>
           <Layer>
-            {image && <KonvaImage image={image} width={width} height={height} />}
+            {image && <KonvaImage image={image} x={fit.x} y={fit.y} width={fit.width} height={fit.height} />}
             {diagram.mode === 'labeled' && labels.map((l) => {
               const correct = correctIds.has(l.id)
+              const r = ratiosToRect(l, fit)
               return (
                 <Rect
                   key={l.id}
-                  x={l.x}
-                  y={l.y}
-                  width={l.width}
-                  height={l.height}
+                  x={r.x} y={r.y} width={r.width} height={r.height}
                   fill={!submitted ? '#374151' : correct ? 'rgba(34,197,94,0.6)' : 'rgba(239,68,68,0.6)'}
                   stroke={!submitted ? '#1f2937' : correct ? '#16a34a' : '#dc2626'}
                   strokeWidth={1}
                 />
               )
             })}
-            {diagram.mode === 'clean' && labels.map((l, i) => (
-              <React.Fragment key={l.id}>
-                <Circle x={l.pin_x} y={l.pin_y} radius={10} fill="#6366f1" stroke="#fff" strokeWidth={2} />
-                <Text x={l.pin_x - 4} y={l.pin_y - 6} text={String(i + 1)} fontSize={11} fill="#fff" fontStyle="bold" />
-              </React.Fragment>
-            ))}
+            {diagram.mode === 'clean' && labels.map((l, i) => {
+              const pos = ratiosToPin(l, fit)
+              return (
+                <React.Fragment key={l.id}>
+                  <Circle x={pos.x} y={pos.y} radius={10} fill="#6366f1" stroke="#fff" strokeWidth={2} />
+                  <Text x={pos.x - 4} y={pos.y - 6} text={String(i + 1)} fontSize={11} fill="#fff" fontStyle="bold" />
+                </React.Fragment>
+              )
+            })}
           </Layer>
         </Stage>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto', maxHeight: `${height}px` }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '300px', overflowY: 'auto' }}>
           {labels.map((l, i) => {
             const correct = correctIds.has(l.id)
             return (

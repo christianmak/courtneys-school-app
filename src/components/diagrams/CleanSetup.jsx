@@ -1,15 +1,23 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Stage, Layer, Image as KonvaImage, Circle, Text } from 'react-konva'
 import useImage from 'use-image'
 import { useCanvasSize } from '../../hooks/useCanvasSize'
+import { computeImageFit, pinToRatios, ratiosToPin } from '../../lib/imageUtils'
 
 export default function CleanSetup({ diagram, onSaveLabels, onDone }) {
   const [image, imageStatus] = useImage(diagram.image_url)
   const [pins, setPins] = useState([])
   const [pendingPin, setPendingPin] = useState(null)
   const [labelText, setLabelText] = useState('')
+  const [fit, setFit] = useState({ x: 0, y: 0, width: 700, height: 500 })
   const stageRef = useRef()
   const { containerRef, width, height } = useCanvasSize(700, 7 / 5)
+
+  useEffect(() => {
+    if (image) {
+      setFit(computeImageFit(image.naturalWidth, image.naturalHeight, width, height))
+    }
+  }, [image, width, height])
 
   const handleClick = () => {
     if (pendingPin) return
@@ -18,7 +26,8 @@ export default function CleanSetup({ diagram, onSaveLabels, onDone }) {
 
   const handleConfirm = () => {
     if (!labelText.trim()) return
-    setPins((prev) => [...prev, { pin_x: pendingPin.x, pin_y: pendingPin.y, label_text: labelText.trim() }])
+    const ratios = pinToRatios(pendingPin, fit)
+    setPins((prev) => [...prev, { ...ratios, label_text: labelText.trim() }])
     setPendingPin(null); setLabelText('')
   }
 
@@ -50,13 +59,16 @@ export default function CleanSetup({ diagram, onSaveLabels, onDone }) {
       <div ref={containerRef} style={{ width: '100%' }}>
       <Stage ref={stageRef} width={width} height={height} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'crosshair' }} onClick={handleClick} onTap={handleClick}>
         <Layer>
-          {image && <KonvaImage image={image} width={width} height={height} />}
-          {pins.map((p, i) => (
-            <React.Fragment key={i}>
-              <Circle x={p.pin_x} y={p.pin_y} radius={8} fill="#6366f1" stroke="#fff" strokeWidth={2} />
-              <Text x={p.pin_x + 12} y={p.pin_y - 8} text={p.label_text} fontSize={13} fill="#1e1b4b" fontStyle="bold" />
-            </React.Fragment>
-          ))}
+          {image && <KonvaImage image={image} x={fit.x} y={fit.y} width={fit.width} height={fit.height} />}
+          {pins.map((p, i) => {
+            const pos = ratiosToPin(p, fit)
+            return (
+              <React.Fragment key={i}>
+                <Circle x={pos.x} y={pos.y} radius={8} fill="#6366f1" stroke="#fff" strokeWidth={2} />
+                <Text x={pos.x + 12} y={pos.y - 8} text={p.label_text} fontSize={13} fill="#1e1b4b" fontStyle="bold" />
+              </React.Fragment>
+            )
+          })}
           {pendingPin && <Circle x={pendingPin.x} y={pendingPin.y} radius={8} fill="#ef4444" stroke="#fff" strokeWidth={2} />}
         </Layer>
       </Stage>
