@@ -8,7 +8,7 @@ function normalize(str) {
 }
 
 export default function QuizMode({ diagram, labels, onBack, onRedoSetup }) {
-  const [image] = useImage(diagram.image_url, 'anonymous')
+  const [image, imageStatus] = useImage(diagram.image_url)
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const { containerRef, width, height } = useCanvasSize(560, 4 / 3)
@@ -45,6 +45,12 @@ export default function QuizMode({ diagram, labels, onBack, onRedoSetup }) {
         </div>
       </div>
 
+      {imageStatus === 'loading' && (
+        <p style={{ color: '#6b7280', fontSize: '13px', marginBottom: '8px' }}>Loading image...</p>
+      )}
+      {imageStatus === 'failed' && (
+        <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '8px' }}>⚠ Image failed to load. Check your connection.</p>
+      )}
       <div ref={containerRef} style={{ display: 'flex', gap: '20px' }}>
         <Stage width={width} height={height} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', flexShrink: 0 }}>
           <Layer>

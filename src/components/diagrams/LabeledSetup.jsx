@@ -4,7 +4,7 @@ import useImage from 'use-image'
 import { useCanvasSize } from '../../hooks/useCanvasSize'
 
 export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
-  const [image] = useImage(diagram.image_url, 'anonymous')
+  const [image, imageStatus] = useImage(diagram.image_url)
   const [labels, setLabels] = useState([])
   const [startPos, setStartPos] = useState(null)
   const [currentRect, setCurrentRect] = useState(null)
@@ -57,6 +57,12 @@ export default function LabeledSetup({ diagram, onSaveLabels, onDone }) {
           </button>
         </div>
       </div>
+      {imageStatus === 'loading' && (
+        <p style={{ color: '#6b7280', fontSize: '13px', marginBottom: '8px' }}>Loading image...</p>
+      )}
+      {imageStatus === 'failed' && (
+        <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '8px' }}>⚠ Image failed to load. Check your connection.</p>
+      )}
       <div ref={containerRef} style={{ width: '100%' }}>
       <Stage ref={stageRef} width={width} height={height} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'crosshair' }}
         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}
