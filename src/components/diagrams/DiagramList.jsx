@@ -1,4 +1,4 @@
-export default function DiagramList({ diagrams, onSelect, onAdd }) {
+export default function DiagramList({ diagrams, onSelect, onAdd, onDelete }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -12,7 +12,15 @@ export default function DiagramList({ diagrams, onSelect, onAdd }) {
               <div style={{ fontWeight: '500' }}>{d.name}</div>
               <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>{d.mode === 'labeled' ? 'Labels on image' : 'Clean image'}</div>
             </div>
-            <span>🖼</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>🖼</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete(d.id) }}
+                style={{ padding: '6px 10px', border: 'none', background: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '14px', flexShrink: 0 }}
+                title="Delete diagram"
+                aria-label="Delete diagram"
+              >🗑</button>
+            </div>
           </div>
         ))}
         {diagrams.length === 0 && <p style={{ color: '#9ca3af' }}>No diagrams yet.</p>}

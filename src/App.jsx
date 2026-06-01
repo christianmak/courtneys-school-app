@@ -13,12 +13,12 @@ import { useNotes } from './hooks/useNotes'
 import { useDiagrams } from './hooks/useDiagrams'
 
 export default function App() {
-  const { classes, addClass } = useClasses()
+  const { classes, addClass, deleteClass } = useClasses()
   const [activeClassId, setActiveClassId] = useState(null)
-  const { topics, addTopic } = useTopics(activeClassId)
+  const { topics, addTopic, deleteTopic } = useTopics(activeClassId)
   const [activeTopicId, setActiveTopicId] = useState(null)
-  const { notes, addNote, updateNoteContent } = useNotes(activeTopicId)
-  const { diagrams, addDiagram, addLabel, addLabels, getLabels } = useDiagrams(activeTopicId)
+  const { notes, addNote, updateNoteContent, deleteNote } = useNotes(activeTopicId)
+  const { diagrams, addDiagram, deleteDiagram, addLabel, addLabels, getLabels } = useDiagrams(activeTopicId)
   const [activeNote, setActiveNote] = useState(null)
   const [activeDiagram, setActiveDiagram] = useState(null)
   const [quizDiagram, setQuizDiagram] = useState(null)
@@ -36,6 +36,34 @@ export default function App() {
     if (labels.length === 0) { setActiveDiagram(diagram); return }
     setQuizLabels(labels)
     setQuizDiagram(diagram)
+  }
+
+  const handleDeleteClass = async (id) => {
+    if (!window.confirm('Delete this class and all its topics and notes?')) return
+    await deleteClass(id)
+    setActiveClassId(null)
+    setActiveTopicId(null)
+    setActiveNote(null)
+    setView('notes')
+  }
+
+  const handleDeleteTopic = async (id) => {
+    if (!window.confirm('Delete this topic and all its notes and diagrams?')) return
+    await deleteTopic(id)
+    setActiveTopicId(null)
+    setActiveNote(null)
+    setView('notes')
+  }
+
+  const handleDeleteNote = async (id) => {
+    if (!window.confirm('Delete this note?')) return
+    await deleteNote(id)
+    if (activeNote?.id === id) setActiveNote(null)
+  }
+
+  const handleDeleteDiagram = async (id) => {
+    if (!window.confirm('Delete this diagram and its labels?')) return
+    await deleteDiagram(id)
   }
 
   const renderContent = () => {
@@ -69,15 +97,15 @@ export default function App() {
             <button key={v} onClick={() => setView(v)} style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', background: view === v ? '#6366f1' : '#e5e7eb', color: view === v ? '#fff' : '#374151', cursor: 'pointer', textTransform: 'capitalize' }}>{v}</button>
           ))}
         </div>
-        {view === 'notes' && <NotesList notes={notes} onSelect={setActiveNote} onAdd={handleAddNote} />}
-        {view === 'diagrams' && <DiagramList diagrams={diagrams} onSelect={handleOpenDiagram} onAdd={() => setView('addDiagram')} />}
+        {view === 'notes' && <NotesList notes={notes} onSelect={setActiveNote} onAdd={handleAddNote} onDelete={handleDeleteNote} />}
+        {view === 'diagrams' && <DiagramList diagrams={diagrams} onSelect={handleOpenDiagram} onAdd={() => setView('addDiagram')} onDelete={handleDeleteDiagram} />}
       </div>
     )
   }
 
   return (
-    <AppShell classes={classes} activeClassId={activeClassId} onSelectClass={handleSelectClass} onAddClass={handleAddClass}
-      topics={topics} activeTopicId={activeTopicId} onSelectTopic={handleSelectTopic} onAddTopic={handleAddTopic}>
+    <AppShell classes={classes} activeClassId={activeClassId} onSelectClass={handleSelectClass} onAddClass={handleAddClass} onDeleteClass={handleDeleteClass}
+      topics={topics} activeTopicId={activeTopicId} onSelectTopic={handleSelectTopic} onAddTopic={handleAddTopic} onDeleteTopic={handleDeleteTopic}>
       {renderContent()}
     </AppShell>
   )

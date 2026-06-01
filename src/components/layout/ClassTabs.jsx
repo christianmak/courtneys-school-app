@@ -1,4 +1,4 @@
-export default function ClassTabs({ classes, activeId, onSelect, onAdd }) {
+export default function ClassTabs({ classes, activeId, onSelect, onAdd, onDelete }) {
   return (
     <div style={{ display: 'flex', borderBottom: '1px solid #e5e7eb', background: '#fff', flexShrink: 0 }}>
       {classes.map((c) => (
@@ -10,6 +10,13 @@ export default function ClassTabs({ classes, activeId, onSelect, onAdd }) {
           color: activeId === c.id ? c.color : '#374151',
         }}>
           {c.name}
+          {activeId === c.id && (
+            <span
+              onClick={(e) => { e.stopPropagation(); onDelete(c.id) }}
+              style={{ marginLeft: '6px', color: '#9ca3af', cursor: 'pointer', fontSize: '12px', lineHeight: 1 }}
+              title="Delete class"
+            >×</span>
+          )}
         </button>
       ))}
       <button aria-label="Add class" onClick={onAdd} style={{ padding: '10px 16px', border: 'none', background: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: '18px' }}>
