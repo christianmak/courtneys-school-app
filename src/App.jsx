@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import AppShell from './components/layout/AppShell'
 import Toast from './components/layout/Toast'
+import InputModal from './components/layout/InputModal'
 import NotesList from './components/notes/NotesList'
 import NoteEditor from './components/notes/NoteEditor'
 import DiagramList from './components/diagrams/DiagramList'
@@ -27,35 +28,45 @@ export default function App() {
   const [quizLabels, setQuizLabels] = useState([])
   const [view, setView] = useState('notes')
   const { toast, showError, dismiss } = useToast()
+  const [modal, setModal] = useState(null)
+  // modal shape: { title, placeholder, onConfirm } | null
 
-  const handleAddClass = async () => {
-    const name = prompt('Class name:')
-    if (!name) return
-    try {
-      await addClass(name)
-    } catch (err) {
-      showError('Failed to add class. Please try again.')
-    }
+  const showModal = (title, placeholder, onConfirm) => {
+    setModal({ title, placeholder, onConfirm })
+  }
+  const closeModal = () => setModal(null)
+
+  const handleAddClass = () => {
+    showModal('New class', 'e.g. Biology 101', async (name) => {
+      closeModal()
+      try {
+        await addClass(name)
+      } catch {
+        showError('Failed to add class. Please try again.')
+      }
+    })
   }
 
-  const handleAddTopic = async () => {
-    const name = prompt('Topic name:')
-    if (!name) return
-    try {
-      await addTopic(name)
-    } catch (err) {
-      showError('Failed to add topic. Please try again.')
-    }
+  const handleAddTopic = () => {
+    showModal('New topic', 'e.g. Cell Biology', async (name) => {
+      closeModal()
+      try {
+        await addTopic(name)
+      } catch {
+        showError('Failed to add topic. Please try again.')
+      }
+    })
   }
 
-  const handleAddNote = async () => {
-    const title = prompt('Note title:')
-    if (!title) return
-    try {
-      await addNote(title)
-    } catch (err) {
-      showError('Failed to add note. Please try again.')
-    }
+  const handleAddNote = () => {
+    showModal('New note', 'e.g. Lecture 1', async (title) => {
+      closeModal()
+      try {
+        await addNote(title)
+      } catch {
+        showError('Failed to add note. Please try again.')
+      }
+    })
   }
 
   const handleSelectClass = (id) => { setActiveClassId(id); setActiveTopicId(null); setActiveNote(null); setActiveDiagram(null); setQuizDiagram(null); setQuizLabels([]); setView('notes') }
@@ -206,6 +217,14 @@ export default function App() {
         {renderContent()}
       </AppShell>
       {toast && <Toast message={toast} onDismiss={dismiss} />}
+      {modal && (
+        <InputModal
+          title={modal.title}
+          placeholder={modal.placeholder}
+          onConfirm={modal.onConfirm}
+          onCancel={closeModal}
+        />
+      )}
     </>
   )
 }
