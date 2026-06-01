@@ -1,0 +1,38 @@
+<h2>How should the app be built?</h2>
+<p class="subtitle">Three approaches — each has real trade-offs for your laptop + iPad setup.</p>
+
+<div class="options">
+  <div class="option" data-choice="frontend-only" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Frontend Only (No Backend)</h3>
+      <p>Pure HTML/CSS/JavaScript. Data lives in your browser. Works offline instantly, easiest to build.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Simplest to build</li><li>No server needed</li><li>Works offline</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Notes won't sync between laptop and iPad</li><li>Data lost if you clear browser</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="option" data-choice="fullstack" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Full-Stack (Node.js + SQLite) ⭐ Recommended</h3>
+      <p>A small server runs on your laptop. iPad and laptop both connect to it on your home network.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Notes sync between devices</li><li>Data stored properly in a database</li><li>Full control, no third-party</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Server must be running on your laptop to access from iPad</li><li>Slightly more to build</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="option" data-choice="supabase" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Frontend + Supabase (Cloud Database)</h3>
+      <p>Frontend app connected to a free cloud database. Works anywhere, anytime from any device.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Syncs everywhere, always</li><li>No server to manage</li><li>Works away from home</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Depends on a third-party service</li><li>Requires internet connection</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
